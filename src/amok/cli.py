@@ -60,7 +60,7 @@ def main_account():
 @main_account.command("create")
 @click.option("--username", prompt=True)
 @click.option("--password", prompt=True, hide_input=True, confirmation_prompt=True)
-def main_account_create(username: str, password: str):
+def account_create(username: str, password: str):
     api = AmokAPI()
 
     async def _account_create():
@@ -76,7 +76,7 @@ def main_account_create(username: str, password: str):
 @main_account.command("login")
 @click.option("--username", prompt=True)
 @click.option("--password", prompt=True, hide_input=True)
-def main_account_login(username: str, password: str):
+def account_login(username: str, password: str):
     api = AmokAPI()
 
     async def _account_login():
@@ -88,7 +88,7 @@ def main_account_login(username: str, password: str):
 
 
 @main_account.command("logout")
-def main_account_logout():
+def account_logout():
     api = AmokAPI()
 
     async def _account_logout():
@@ -99,7 +99,7 @@ def main_account_logout():
 
 
 @main_account.command("info")
-def main_account_info():
+def account_info():
     api = AmokAPI()
 
     async def _account_info():
@@ -114,7 +114,7 @@ def main_account_info():
 
 
 @main_account.command("delete")
-def main_account_delete():
+def account_delete():
     api = AmokAPI()
 
     async def _account_delete():
@@ -134,7 +134,7 @@ def main_peer():
 
 
 @main_peer.command("list")
-def main_peer_list():
+def peer_list():
     api = AmokAPI()
 
     async def _peer_list():
@@ -150,7 +150,7 @@ def main_peer_list():
 
 @main_peer.command("add")
 @click.option("--peer", prompt=True)
-def main_peer_add(peer: str):
+def peer_add(peer: str):
     if ":" not in peer:
         click.echo("Peer must be in format <host>:<port>")
         raise click.Abort()
@@ -172,7 +172,7 @@ def main_peer_add(peer: str):
 
 @main_peer.command("remove")
 @click.option("--peer", prompt=True)
-def main_peer_remove(peer: str):
+def peer_remove(peer: str):
     api = AmokAPI()
 
     async def _peer_remove():
