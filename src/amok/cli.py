@@ -6,6 +6,24 @@ from amok.api import AmokAPI
 from amok.models import Peer
 
 
+async def parse_peers(peers: str) -> list[Peer]:
+    parsed_peers = []
+    for peer in peers:
+        _host, _port = peer.split(":")
+        parsed_peers.append(Peer(host=_host, port=int(_port)))
+    return parsed_peers
+
+
+async def get_peers_from_keyring(api) -> list[Peer]:
+    peers = []
+    peers_str = await api.get_secret_data("peers")
+    if peers_str:
+        for peer_str in peers_str.split(","):
+            _host, _port = peer_str.split(":")
+            peers.append(Peer(host=_host, port=int(_port)))
+    return peers
+
+
 @click.group()
 def main():
     pass
@@ -35,16 +53,8 @@ def main_run(host: str, port: int, peer: str):
     async def _run_node():
         peers = []
         if peer:
-            for peer_str in peer:
-                _host, _port = peer_str.split(":")
-                peers.append(Peer(host=_host, port=int(_port)))
-
-        peers_str = await api.get_secret_data("peers")
-        if peers_str:
-            for peer_str in peers_str.split(","):
-                _host, _port = peer_str.split(":")
-                peers.append(Peer(host=_host, port=int(_port)))
-
+            peers.extend(await parse_peers(peer))
+        peers.extend(await get_peers_from_keyring(api))
         await api.start(host, port, peers)
         while True:
             await asyncio.sleep(1)
@@ -189,3 +199,59 @@ def peer_remove(peer: str):
         click.echo(f"Removed peer {peer!r}")
 
     asyncio.run(_peer_remove())
+
+
+@main.group("dht")
+def main_dht():
+    pass
+
+
+@main_dht.command("get")
+@click.option("--key", prompt=True)
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=3000, show_default=True)
+@click.option("--peer", default=["127.0.0.1:3030"], multiple=True, show_default=True)
+def dht_get(key: str, host: str, port: int, peer: str):
+    api = AmokAPI()
+
+    async def _dht_get():
+        peers = []
+        if peer:
+            peers.extend(await parse_peers(peer))
+        peers.extend(await get_peers_from_keyring(api))
+        await api.start(host, port, peers)
+
+        token = await api.get_secret_data("token")
+        if not token:
+            click.echo("Not logged in")
+            raise click.Abort()
+        await api.account_token_login(token)
+        print(await api.get_public_data(key))
+
+    asyncio.run(_dht_get())
+
+
+@main_dht.command("set")
+@click.option("--key", prompt=True)
+@click.option("--value", prompt=True)
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=3000, show_default=True)
+@click.option("--peer", default=["127.0.0.1:3030"], multiple=True, show_default=True)
+def dht_set(key: str, value: str, host: str, port: int, peer: str):
+    api = AmokAPI()
+
+    async def _dht_set():
+        peers = []
+        if peer:
+            peers.extend(await parse_peers(peer))
+        peers.extend(await get_peers_from_keyring(api))
+        await api.start(host, port, peers)
+
+        token = await api.get_secret_data("token")
+        if not token:
+            click.echo("Not logged in")
+            raise click.Abort()
+        await api.account_token_login(token)
+        await api.set_public_data(key, value)
+
+    asyncio.run(_dht_set())
