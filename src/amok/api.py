@@ -134,8 +134,8 @@ class AmokAPI:
 
     @login_required
     async def account_delete(self) -> None:
-        await self.set_secret_data("username", "")
-        await self.set_secret_data("password_hash", "")
+        await self.delete_secret_data("username")
+        await self.delete_secret_data("password_hash")
         self.username = None
         logger.info("Deleted account")
 
