@@ -25,6 +25,16 @@ def dht_required(func):
     return wrapper
 
 
+def login_required(func):
+    async def wrapper(self, *args, **kwargs):
+        if self.username:
+            return await func(self, *args, **kwargs)
+        else:
+            raise RuntimeError("No account loaded")
+
+    return wrapper
+
+
 class AmokAPI:
     def __init__(self):
         self.dht: KademliaServer = None  # type: ignore
@@ -91,19 +101,17 @@ class AmokAPI:
                     self.username = username
                     logger.info("Logged in as %s", username)
 
+    @login_required
     async def account_token(self) -> str:
-        if self.username:
-            secret_key = await self.get_secret_data("secret_key")
-            if not secret_key:
-                secret_key = secrets.token_urlsafe(64)
-                await self.set_secret_data("secret_key", secret_key)
-            token = URLSafeTimedSerializer(secret_key=secret_key).dumps(self.username)
-            if isinstance(token, bytes):
-                return token.decode("utf-8")
-            else:
-                return token
+        secret_key = await self.get_secret_data("secret_key")
+        if not secret_key:
+            secret_key = secrets.token_urlsafe(64)
+            await self.set_secret_data("secret_key", secret_key)
+        token = URLSafeTimedSerializer(secret_key=secret_key).dumps(self.username)
+        if isinstance(token, bytes):
+            return token.decode("utf-8")
         else:
-            raise AssertionError("No account loaded")
+            return token
 
     async def account_token_login(self, token: str) -> None:
         if self.username:
@@ -119,27 +127,20 @@ class AmokAPI:
             else:
                 self.username = username
 
+    @login_required
     async def account_logout(self) -> None:
-        if self.username:
-            self.username = None
-            logger.info("Logged out")
-        else:
-            raise AssertionError("No account loaded")
+        self.username = None
+        logger.info("Logged out")
 
+    @login_required
     async def account_delete(self) -> None:
-        if self.username:
-            await self.set_secret_data("username", "")
-            await self.set_secret_data("password_hash", "")
-            self.username = None
-            logger.info("Deleted account")
-        else:
-            raise AssertionError("No account loaded")
+        await self.set_secret_data("username", "")
+        await self.set_secret_data("password_hash", "")
+        self.username = None
+        logger.info("Deleted account")
 
+    @login_required
     async def account_info(self) -> dict[str, str]:
-        if self.username:
-            return {
-                "username": self.username,
-                "token": await self.account_token(),
-            }
-        else:
-            raise AssertionError("No account loaded")
+        return {
+            "username": self.username,  # type: ignore
+        }
