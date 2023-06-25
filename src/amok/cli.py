@@ -34,9 +34,16 @@ def main_run(host: str, port: int, peer: str):
 
     async def _run_node():
         peers = []
-        for peer_str in peer:
-            _host, _port = peer_str.split(":")
-            peers.append(Peer(host=_host, port=int(_port)))
+        if peer:
+            for peer_str in peer:
+                _host, _port = peer_str.split(":")
+                peers.append(Peer(host=_host, port=int(_port)))
+
+        peers_str = await api.get_secret_data("peers")
+        if peers_str:
+            for peer_str in peers_str.split(","):
+                _host, _port = peer_str.split(":")
+                peers.append(Peer(host=_host, port=int(_port)))
 
         await api.start(host, port, peers)
         while True:
@@ -119,3 +126,66 @@ def main_account_delete():
         await api.account_delete()
 
     asyncio.run(_account_delete())
+
+
+@main.group("peer")
+def main_peer():
+    pass
+
+
+@main_peer.command("list")
+def main_peer_list():
+    api = AmokAPI()
+
+    async def _peer_list():
+        peers_str = await api.get_secret_data("peers")
+        if not peers_str:
+            click.echo("No peers set")
+            return
+        for peer in peers_str.split(","):
+            click.echo(peer)
+
+    asyncio.run(_peer_list())
+
+
+@main_peer.command("add")
+@click.option("--peer", prompt=True)
+def main_peer_add(peer: str):
+    if ":" not in peer:
+        click.echo("Peer must be in format <host>:<port>")
+        raise click.Abort()
+
+    api = AmokAPI()
+
+    async def _peer_add():
+        peers_str = await api.get_secret_data("peers")
+        if peers_str:
+            peers = peers_str.split(",")
+        else:
+            peers = []
+        peers.append(peer)
+        await api.set_secret_data("peers", ",".join(peers))
+        click.echo(f"Added peer {peer!r}")
+
+    asyncio.run(_peer_add())
+
+
+@main_peer.command("remove")
+@click.option("--peer", prompt=True)
+def main_peer_remove(peer: str):
+    api = AmokAPI()
+
+    async def _peer_remove():
+        peers_str = await api.get_secret_data("peers")
+        if not peers_str:
+            click.echo("No peers set")
+            return
+        peers = peers_str.split(",")
+        if peer not in peers:
+            click.echo(f"Peer {peer!r} not in peers")
+            return
+        peers.remove(peer)
+        await api.set_secret_data("peers", ",".join(peers))
+        click.echo(f"Removed peer {peer!r}")
+
+    asyncio.run(_peer_remove())
