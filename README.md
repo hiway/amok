@@ -51,7 +51,7 @@ Hiway:9b0c180377a584bf5014a341d6c529ef25e3f7f16d5b19ee7fa7533c7639a27c
 
 ```console
 $ amok follow
-Paste your friend's amok-id below: 
+Paste Amok ID below: 
 
 Example:c0f98f9eda03c949ca6fa0d2ed462b84933cad5ec5143afcdfe6140cb22cbd5e
 
