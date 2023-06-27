@@ -106,6 +106,9 @@ from amok import AmokAPI
 amok = AmokAPI()
 
 async def main():
+    # Connect to DHT
+    await amok.start()
+
     # Create an account
     await amok.init(name="Hiway")
 
@@ -124,6 +127,9 @@ async def main():
     print("Statuses:")
     async for status in amok.read():
         print(f"[{status.name}]: {status.message}")
+
+    # Disconnect from DHT
+    await amok.stop()
 
 
 asyncio.run(main())
