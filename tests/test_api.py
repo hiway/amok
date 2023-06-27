@@ -122,6 +122,31 @@ async def test_post_and_read():
 
     status = "Hello, World!"
     await amok.post(status)
-    status_ = await amok.read()
+
+    async for status_ in amok.read():
+        assert status_ == status
+        break
+
     await amok.stop()
-    assert status_ == status
+    await peer.stop()
+
+
+async def test_follow(tmp_path):
+    amok = AmokAPI(config_path=tmp_path.joinpath("config.json"))
+    await amok.start("127.0.0.1", 8071)
+
+    await amok.follow("id1")
+    await amok.follow("id2")
+    assert await amok.following() == ["id1", "id2"]
+    await amok.stop()
+
+
+async def test_unfollow(tmp_path):
+    amok = AmokAPI(config_path=tmp_path.joinpath("config.json"))
+    await amok.start("127.0.0.1", 8072)
+
+    await amok.follow("id1")
+    await amok.follow("id2")
+    await amok.unfollow("id1")
+    assert await amok.following() == ["id2"]
+    await amok.stop()
