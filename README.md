@@ -1,14 +1,16 @@
-# amok-python
+# Amok
 
-Peer to peer Personal Status Updates
+Peer-to-peer Ephemeral Status Updates
 
 - Amok uses distributed hash tables (DHT) to publish and subscribe to status updates
-- Status update is a short text message that is available to everyone who has subscribed to your account-id
-- Account-id is hashed fingerprint of your public key
+- Status update is a short text message that is available to everyone who has subscribed to your Amok ID
+- Amok ID is hashed fingerprint of your public key
 - Your public key signs the status so others can verify it is indeed you who posted the status
-- Share your account (id) with friends or general public
-- Subscribe to accounts (id) to receive status updates
-- No servers, no signups, no databases, no tracking, no ads
+- Share your Amok ID with friends or general public
+- Subscribe to Amok ID to receive status updates
+- No servers, no signups, no ads
+
+---
 
 ## Command-line interface:
 
@@ -93,4 +95,38 @@ Public IPv4/domain: example.local
 Starting Amok... ready.
 
 Amok is available at https://example.local:3443/
+```
+
+---
+
+## Python API
+
+```python
+import asyncio
+from amok import AmokAPI
+
+amok = AmokAPI()
+
+async def main():
+    # Create an account
+    await amok.init(name="Hiway")
+
+    # Post a status
+    status = "Hello, World!"
+    await amok.post(status)
+
+    # Amok ID
+    amok_id = await amok.id()
+    print(f"Amok ID: {amok_id}")
+
+    # Follow
+    await amok.follow("Example:c0f98f9eda03c949ca6fa0d2ed462b84933cad5ec5143afcdfe6140cb22cbd5e")
+
+    # Read statuses
+    print("Statuses:")
+    async for status in amok.read():
+        print(f"[{status.name}]: {status.message}")
+
+
+asyncio.run(main())
 ```
