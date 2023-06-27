@@ -10,6 +10,33 @@ Peer-to-peer Ephemeral Status Updates
 
 ---
 
+## Desktop app
+
+```console
+$ amok run
+```
+
+---
+
+## Web interface
+
+```console
+$ amok serve
+
+One-time configuration...
+
+Bind [localhost]: 
+Enable TLS [Yes]:
+Port [3443]:
+Public IPv4/domain: localhost
+
+Starting Amok... ready.
+
+Amok is available at https://localhost:3443/
+```
+
+---
+
 ## Command-line interface:
 
 ### Create an account
@@ -66,33 +93,6 @@ Read followed people's statuses with `amok read`
 $ amok read
 [Example]: Twiddling digits.
 [Hiway]: Hello, World!
-```
-
----
-
-## Desktop app
-
-```console
-$ amok run
-```
-
----
-
-## Web interface
-
-```console
-$ amok serve
-
-One-time configuration...
-
-Bind [localhost]: 
-Enable TLS [Yes]:
-Port [3443]:
-Public IPv4/domain: localhost
-
-Starting Amok... ready.
-
-Amok is available at https://localhost:3443/
 ```
 
 ---
