@@ -55,3 +55,13 @@ async def test_sign_and_verify():
     assert len(signature) == 64
 
     assert await amok.verify(amok.verify_key, signed_message.message, signature)
+
+
+async def test_payload():
+    amok = AmokAPI()
+
+    await amok.init(name="Example")
+    payload = await amok.payload()
+    assert len(payload) == 2
+    assert payload["name"] == "Example"
+    assert isinstance(payload["verify_key"], str)
