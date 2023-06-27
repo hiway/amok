@@ -2,12 +2,10 @@
 
 Peer-to-peer Ephemeral Status Updates
 
-- Amok uses distributed hash tables (DHT) to publish and subscribe to status updates
-- Status update is a short text message that is available to everyone who has subscribed to your Amok ID
-- Amok ID is hashed fingerprint of your public key
-- Your public key signs the status so others can verify it is indeed you who posted the status
+- Amok uses distributed hash table (DHT) to publish and subscribe to status updates
+- Status is text that can be read by anyone subscribed to your Amok ID
 - Share your Amok ID with friends or general public
-- Subscribe to Amok ID to receive status updates
+- Follow Amok IDs of people you care about to receive status updates
 - No servers, no signups, no ads
 
 ---
@@ -90,11 +88,11 @@ One-time configuration...
 Bind [localhost]: 
 Enable TLS [Yes]:
 Port [3443]:
-Public IPv4/domain: example.local
+Public IPv4/domain: localhost
 
 Starting Amok... ready.
 
-Amok is available at https://example.local:3443/
+Amok is available at https://localhost:3443/
 ```
 
 ---
