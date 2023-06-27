@@ -1,4 +1,7 @@
+import asyncio
+
 import pytest
+
 from nacl.signing import SigningKey, VerifyKey
 from amok import AmokAPI
 
@@ -60,6 +63,7 @@ async def test_sign_and_verify():
 async def test_payload():
     amok = AmokAPI()
 
+    await amok.start()
     await amok.init(name="Example")
     payload = await amok.payload()
     assert len(payload) == 2
@@ -70,7 +74,7 @@ async def test_payload():
 async def test_start_stop():
     amok = AmokAPI()
 
-    await amok.start("127.0.0.1", 8000)
+    await amok.start("127.0.0.1", 8070)
     assert amok._dht is not None
     await amok.stop()
 
@@ -79,9 +83,9 @@ async def test_start_with_peers():
     amok = AmokAPI()
     peer = AmokAPI()
 
-    await peer.start("127.0.0.1", 8001)
+    await peer.start("127.0.0.1", 8090)
 
-    await amok.start("127.0.0.1", 8000, [("127.0.0.1", 8001)])
+    await amok.start("127.0.0.1", 8070, [("127.0.0.1", 8090)])
     assert amok._dht is not None
 
     await amok.stop()
@@ -93,3 +97,21 @@ async def test_stop_without_start():
 
     with pytest.raises(AssertionError):
         await amok.stop()
+
+
+async def test_post_and_read():
+    amok = AmokAPI()
+    peer = AmokAPI()
+
+    await peer.start("127.0.0.1", 8090)
+
+    await amok.start("127.0.0.1", 8070, peers=[("127.0.0.1", 8090)])
+    await amok.init(name="Example")
+
+    await asyncio.sleep(0.2)
+
+    status = "Hello, World!"
+    await amok.post(status)
+    status_ = await amok.read()
+    await amok.stop()
+    assert status_ == status
