@@ -3,6 +3,7 @@ from secrets import token_bytes
 from typing import Optional
 
 import keyring
+from kademlia.network import Server as KademliaServer
 from nacl.signing import SigningKey, VerifyKey, SignedMessage
 from nacl.encoding import Base64Encoder
 
@@ -12,6 +13,7 @@ class AmokAPI:
         self.name: Optional[str] = None
         self._signing_key: Optional[SigningKey] = None
         self._verify_key: Optional[VerifyKey] = None
+        self._dht: Optional[KademliaServer] = None
 
     @property
     def verify_key(self) -> str:
@@ -46,3 +48,13 @@ class AmokAPI:
             "name": self.name,
             "verify_key": self.verify_key,
         }
+
+    async def start(self, host: str, port: int, peers: Optional[list[tuple]] = None):
+        self._dht = KademliaServer()
+        await self._dht.listen(port, interface=host)
+        if peers:
+            await self._dht.bootstrap(peers)
+
+    async def stop(self):
+        assert self._dht
+        self._dht.stop()

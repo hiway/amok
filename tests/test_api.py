@@ -1,5 +1,5 @@
+import pytest
 from nacl.signing import SigningKey, VerifyKey
-
 from amok import AmokAPI
 
 
@@ -65,3 +65,31 @@ async def test_payload():
     assert len(payload) == 2
     assert payload["name"] == "Example"
     assert isinstance(payload["verify_key"], str)
+
+
+async def test_start_stop():
+    amok = AmokAPI()
+
+    await amok.start("127.0.0.1", 8000)
+    assert amok._dht is not None
+    await amok.stop()
+
+
+async def test_start_with_peers():
+    amok = AmokAPI()
+    peer = AmokAPI()
+
+    await peer.start("127.0.0.1", 8001)
+
+    await amok.start("127.0.0.1", 8000, [("127.0.0.1", 8001)])
+    assert amok._dht is not None
+
+    await amok.stop()
+    await peer.stop()
+
+
+async def test_stop_without_start():
+    amok = AmokAPI()
+
+    with pytest.raises(AssertionError):
+        await amok.stop()
