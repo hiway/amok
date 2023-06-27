@@ -34,7 +34,7 @@ Hello, World!
 ^D
 Publishing... done.
 
-Share your amok-id with friends. Run `amok id` to get yours.
+Share your Amok ID with friends. Run `amok id` to get yours.
 Follow your friends with `amok follow`.
 ```
 
@@ -57,7 +57,7 @@ Example:c0f98f9eda03c949ca6fa0d2ed462b84933cad5ec5143afcdfe6140cb22cbd5e
 
 Subscribiing... done.
 
-Check on your friends with `amok read`
+Read followed people's statuses with `amok read`
 ```
 
 ### Check on your friends
