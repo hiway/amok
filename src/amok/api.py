@@ -20,7 +20,9 @@ class AmokAPI:
     @property
     def id(self) -> str:
         assert self._verify_key
-        return sha256(self._verify_key.encode(Base64Encoder)).hexdigest()
+        assert self.name
+        hash = sha256(self._verify_key.encode(Base64Encoder)).hexdigest()
+        return f"{self.name}:{hash}"
 
     @property
     def verify_key(self) -> str:

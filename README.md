@@ -117,8 +117,7 @@ async def main():
     await amok.post(status)
 
     # Amok ID
-    amok_id = await amok.id()
-    print(f"Amok ID: {amok_id}")
+    print(f"Amok ID: {amok.id}")
 
     # Follow
     await amok.follow("Example:c0f98f9eda03c949ca6fa0d2ed462b84933cad5ec5143afcdfe6140cb22cbd5e")

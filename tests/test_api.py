@@ -46,6 +46,15 @@ async def test_init_different_names():
     assert verify_key != amok._verify_key
 
 
+async def test_id():
+    amok = AmokAPI()
+
+    await amok.init(name="Example")
+
+    assert len(amok.id.split(":")) == 2
+    assert amok.id.split(":")[0] == "Example"
+
+
 async def test_sign_and_verify():
     amok = AmokAPI()
 
@@ -69,6 +78,7 @@ async def test_payload():
     assert len(payload) == 2
     assert payload["name"] == "Example"
     assert isinstance(payload["verify_key"], str)
+    await amok.stop()
 
 
 async def test_start_stop():
