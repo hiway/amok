@@ -11,6 +11,11 @@ from kademlia.network import Server as KademliaServer
 from nacl.signing import SigningKey, VerifyKey, SignedMessage
 from nacl.encoding import Base64Encoder
 
+from amok.logging import get_logger
+
+
+logger = get_logger(__name__)
+
 
 class AmokAPI:
     def __init__(self, config_path: Optional[Path] = None) -> None:
@@ -65,12 +70,15 @@ class AmokAPI:
     ):
         self._dht = KademliaServer()
         await self._dht.listen(port, interface=host)
+        logger.info(f"Listening on {host}:{port}")
         if peers:
             await self._dht.bootstrap(peers)
+            logger.info(f"Bootstrapped with {peers}")
 
     async def stop(self):
         assert self._dht
         self._dht.stop()
+        logger.info("Stopped")
 
     async def payload(self) -> dict:
         assert self._dht
@@ -78,8 +86,12 @@ class AmokAPI:
         if published_payload:
             _payload = json.loads(published_payload)
             if not _payload["name"] == self.name:
+                logger.warning(f"Name mismatch: {self.name} != {_payload['name']}")
                 _payload = {}
             if not _payload["verify_key"] == self.verify_key:
+                logger.warning(
+                    f"Verify key mismatch: {self.verify_key} != {_payload['verify_key']}"
+                )
                 _payload = {}
         else:
             _payload = {}
@@ -98,8 +110,8 @@ class AmokAPI:
         signed_message = await self.sign(status.encode("utf-8"))
         payload["message"] = signed_message.message.decode("utf-8")
         payload["signature"] = b64encode(signed_message.signature).decode("utf-8")
-
         await self._dht.set(self.id, json.dumps(payload))
+        logger.info(f"Posted: {status}")
 
     async def read(self) -> AsyncIterator[dict]:
         assert self._dht
@@ -108,16 +120,18 @@ class AmokAPI:
         for id in following:
             payload_ = await self._dht.get(id)
             if not payload_:
+                logger.debug(f"Payload not found: {id}")
                 continue
             payload = json.loads(payload_)
             if not payload.get("message"):
+                logger.debug(f"Payload missing message: {id}")
                 continue
-            # Verify
             if not await self.verify(
                 payload["verify_key"],
                 payload["message"].encode("utf-8"),
                 b64decode(payload["signature"]),
             ):
+                logger.warning(f"Payload signature invalid: {id}")
                 continue
             yield payload
 
@@ -135,6 +149,7 @@ class AmokAPI:
             config["follows"].append(id)
         with open(self._config_path, "w") as f:
             json.dump(config, f)
+        logger.info(f"Followed: {id}")
 
     async def unfollow(self, id: str):
         assert self._dht
@@ -150,6 +165,7 @@ class AmokAPI:
             config["follows"].remove(id)
         with open(self._config_path, "w") as f:
             json.dump(config, f)
+        logger.info(f"Unfollowed: {id}")
 
     async def following(self):
         assert self._dht
