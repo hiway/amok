@@ -2,6 +2,9 @@
 
 Peer-to-peer Ephemeral Status Updates
 
+> Note: These are planned features, the following is an aspirational readme.
+> Once releases start appearing on this project, it should be ready to test.
+
 - Amok uses distributed hash table (DHT) to publish and subscribe to status updates
 - Status is text that can be read by anyone subscribed to your Amok ID
 - Share your Amok ID with friends or general public
